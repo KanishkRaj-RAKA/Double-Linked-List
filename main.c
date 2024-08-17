@@ -14,9 +14,13 @@ struct node* createNode(int );
 void dataFirst(struct node** , int );
 void dataEnd(struct node** , int );
 void dataPos(struct node** , int ,int );
+void datatBefore(struct node** , struct node* , int );
+void dataAfter(struct node* , int );
 void deleteFirst(struct node** );
 void deleteEnd(struct node**);
 void deleteGivenPoint(struct node** ,int );
+void dataDeleteBefore(struct node** , struct node* );
+void dataDeleteAfter(struct node* );
 void search(struct node**,int);
 void deleteList(struct node** );
 
@@ -47,29 +51,33 @@ void displayList(struct node* head) {
     printf("NULL \n");
 }
 
-
 //Main Function
 int main() {
     struct node* head = NULL;
-    int data,pos,key;
+    int data, pos, key;
+    struct node* node;
     int select;
-    //Menu list
+
     while (1) {
         printf("Select one\n");
         printf("1. Create list\n");
         printf("2. Insert at first\n");
         printf("3. Insert at end \n");
         printf("4. Insert at given point \n");
-        printf("5. Delete at first\n");
-        printf("6. Delete at end\n");
-        printf("7. Delete at given point \n");
-        printf("8. Search data\n");
-        printf("9. Display list\n");
-        printf("10. Delete list\n");
-        printf("11. Exit\n");
+        printf("5. Insert before a node\n");
+        printf("6. Insert after a node\n");
+        printf("7. Delete at first\n");
+        printf("8. Delete at end\n");
+        printf("9. Delete at given point \n");
+        printf("10. Delete before a node\n");
+        printf("11. Delete after a node\n");
+        printf("12. Search data\n");
+        printf("13. Display list\n");
+        printf("14. Delete list\n");
+        printf("15. Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &select);
-        // Function Calling
+
         switch (select) {
             case 1:
                 printf("Enter the data to create the list: ");
@@ -89,36 +97,75 @@ int main() {
             case 4:
                 printf("Enter the position to insert the data: ");
                 scanf("%d", &pos);
-                printf("Enter the data to insert the given pos: ");
+                printf("Enter the data to insert at the given pos: ");
                 scanf("%d", &data);
-                dataPos(&head, data,pos);
+                dataPos(&head, data, pos);
                 break;
             case 5:
-                deleteFirst(&head);
+                printf("Enter the data to insert before a node: ");
+                scanf("%d", &data);
+                printf("Enter the data of the node before which to insert: ");
+                scanf("%d", &pos);
+                node = head;
+                while (node != NULL && node->data != pos) {
+                    node = node->next;
+                }
+                dataBefore(&head, node, data);
                 break;
             case 6:
-                deleteEnd(&head);
+                printf("Enter the data to insert after a node: ");
+                scanf("%d", &data);
+                printf("Enter the data of the node after which to insert: ");
+                scanf("%d", &pos);
+                node = head;
+                while (node != NULL && node->data != pos) {
+                    node = node->next;
+                }
+                dataAfter(node, data);
                 break;
             case 7:
-                printf("Enter the position to delete the data: ");
-                scanf("%d", &pos);
-                deleteGivenPoint(&head,pos);
+                deleteFirst(&head);
                 break;
             case 8:
+                deleteEnd(&head);
+                break;
+            case 9:
+                printf("Enter the position to delete the data: ");
+                scanf("%d", &pos);
+                deleteGivenPoint(&head, pos);
+                break;
+            case 10:
+                printf("Enter the data of the node before which to delete: ");
+                scanf("%d", &pos);
+                node = head;
+                while (node != NULL && node->data != pos) {
+                    node = node->next;
+                }
+                dataDeleteBefore(&head, node);
+                break;
+            case 11:
+                printf("Enter the data of the node after which to delete: ");
+                scanf("%d", &pos);
+                node = head;
+                while (node != NULL && node->data != pos) {
+                    node = node->next;
+                }
+                dataDeleteAfter(node);
+                break;
+            case 12:
                 printf("Enter the Data: ");
                 scanf("%d", &key);
                 search(&head, key);
                 break;
-
-            case 9:
+            case 13:
                 displayList(head);
                 break;
-            case 10:
+            case 14:
                 deleteList(&head);
                 break;
-            case 11:
+            case 15:
+                deleteList(&head);
                 exit(0);
-                break;
         }
     }
 
@@ -179,6 +226,58 @@ void dataPos(struct node** head, int data,int pos) {
     temp->next=newNode;
     return;
 }
+// Insert a node before a given node
+void dataBefore(struct node** head, struct node* nextNode, int data) {
+    if (nextNode == NULL) {
+        printf("The given next node cannot be NULL\n");
+        return;
+    }
+    struct node* newNode = createNode(data);
+
+    if (*head == nextNode) { // Insert before the head
+        newNode->next = *head;
+        newNode->prev = NULL;
+        if (*head) {
+            (*head)->prev = newNode;
+        }
+        *head = newNode;
+        return;
+    }
+
+    struct node* temp = *head;
+    while (temp != NULL && temp->next != nextNode) {
+        temp = temp->next;
+    }
+
+    if (temp == NULL) {
+        printf("The given next node is not found in the list\n");
+        return;
+    }
+
+    newNode->next = temp->next;
+    newNode->prev = temp;
+    if (temp->next != NULL) {
+        temp->next->prev = newNode;
+    }
+    temp->next = newNode;
+}
+
+// Insert a node after a given node
+void dataAfter(struct node* prevNode, int data){
+    if (prevNode == NULL) {
+        printf("The given previous node cannot be NULL\n");
+        return;
+    }
+    struct node* newNode = createNode(data);
+    newNode->next = prevNode->next;
+    newNode->prev = prevNode;
+    if (prevNode->next != NULL) {
+        prevNode->next->prev = newNode;
+    }
+    prevNode->next = newNode;
+}
+
+
 //Delete at first
 void deleteFirst(struct node** head){
     struct node * temp=*head;
@@ -245,6 +344,45 @@ void deleteGivenPoint(struct node** head, int pos) {
     free(temp);
     return;
 }
+void dataDeleteBefore(struct node** head, struct node* nextNode){
+    if (nextNode == NULL || *head == NULL || *head == nextNode){
+        printf("No node to delete before the given node\n");
+        return;
+    }
+    if ((*head)->next == nextNode) {
+        deleteFirst(head);
+        return;
+    }
+    struct node* temp = *head;
+    while (temp != NULL && temp->next != nextNode) {
+        temp = temp->next;
+    }
+    if (temp == NULL) {
+        printf("The given next node is not found in the list\n");
+        return;
+    }
+    struct node* nodeToDelete = temp;
+    temp->prev->next = nextNode;
+    nextNode->prev = temp->prev;
+    free(nodeToDelete);
+}
+// Delete a node after a given node
+void dataDeleteAfter(struct node* prevNode){
+    if (prevNode == NULL) {
+        printf("The given previous node cannot be NULL\n");
+        return;
+    }
+    struct node* nodeToDelete = prevNode->next;
+    if (nodeToDelete == NULL) {
+        printf("There is no node after the given node\n");
+        return;
+    }
+    prevNode->next = nodeToDelete->next;
+    if (nodeToDelete->next != NULL) {
+        nodeToDelete->next->prev = prevNode;
+    }
+    free(nodeToDelete);
+}
 //Searching
 void search(struct node **head, int key) {
     struct node *current = *head;
@@ -262,8 +400,6 @@ void search(struct node **head, int key) {
 
 }
 
-
-
 //Delete list
 void deleteList(struct node **head) {
     struct node* temp;
@@ -274,4 +410,3 @@ void deleteList(struct node **head) {
     }
     return;
 }
-
